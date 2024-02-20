@@ -2,7 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:form/data/categories.dart';
+import 'package:form/data/dummy.dart';
 import 'package:form/models/category_model.dart';
+import 'package:form/models/grocery_item.dart';
+import 'package:form/screens/grocery.dart';
 
 class NewScreen extends StatefulWidget {
   static final id = 'NewScreen';
@@ -14,13 +17,13 @@ class NewScreen extends StatefulWidget {
 }
 
 class _NewScreenState extends State<NewScreen> {
+  var _enterTitle;
+  var _enterQuantity;
+  var selectCategory = categories[Categories.vegetables];
+
   @override
   Widget build(BuildContext context) {
     GlobalKey<FormState> _formState = GlobalKey<FormState>();
-    var _enterTitle;
-    var _enterQuantity;
-    var selectCategory = categories[Categories.vegetables];
-    var selectCategory2;
 
     return Scaffold(
         appBar: AppBar(title: Text('Add New_Item')),
@@ -72,37 +75,63 @@ class _NewScreenState extends State<NewScreen> {
                       width: 10,
                     ),
                     Expanded(
-                      child: DropdownButtonFormField(
-                        value: selectCategory,
-                        onChanged: (value) {
-                          setState(() {
-                            selectCategory = value;
-                          });
+                        child: Center(
+                      child: CupertinoPicker(
+                        itemExtent: 40,
+                        onSelectedItemChanged: (picked) {
+                          selectCategory =
+                              categories.entries.toList()[picked].value;
                         },
-                        items: [
+                        children: [
                           for (final list in categories.entries)
-                            DropdownMenuItem(
-                              value: list.value,
-                              child: Row(
-                                children: [
-                                  Container(
-                                    height: 16,
-                                    width: 16,
-                                    color: list.value.categoryColor,
-                                  ),
-                                  const SizedBox(
-                                    width: 7,
-                                  ),
-                                  Text(
-                                    list.value.categoryTitle,
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ],
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 16,
+                                  width: 16,
+                                  color: list.value.categoryColor,
+                                ),
+                                const SizedBox(
+                                  width: 7,
+                                ),
+                                Text(list.value.categoryTitle),
+                              ],
                             ),
                         ],
                       ),
-                    ),
+                    )
+
+                        //  DropdownButtonFormField(
+                        //   value: selectCategory,
+                        //   onChanged: (value) {
+                        //     selectCategory = value;
+                        //     setState(() {});
+                        //   },
+                        //   items: [
+                        //     for (final list in categories.entries)
+                        //       DropdownMenuItem(
+                        //         value: list.value,
+                        //         child: Row(
+                        //           children: [
+                        //             Container(
+                        //               height: 16,
+                        //               width: 16,
+                        //               color: list.value.categoryColor,
+                        //             ),
+                        //             const SizedBox(
+                        //               width: 7,
+                        //             ),
+                        //             Text(
+                        //               list.value.categoryTitle,
+                        //               style: const TextStyle(color: Colors.red),
+                        //             ),
+                        //           ],
+                        //         ),
+                        //       ),
+                        //   ],
+                        // ),
+                        ),
                   ],
                 ),
                 const SizedBox(
@@ -124,23 +153,19 @@ class _NewScreenState extends State<NewScreen> {
                             if (_formState.currentState!.validate()) {
                               _formState.currentState!.save();
                             }
-                            print(_enterTitle);
-                            print(_enterQuantity);
+
+                            Navigator.pop(
+                                context,
+                                GroceryItem(
+                                    category: selectCategory!,
+                                    id: DateTime.now().toString(),
+                                    name: _enterTitle,
+                                    quantity: _enterQuantity));
                           },
                           child: const Text('Save'))
                     ],
                   ),
                 ),
-                // DropdownButtonFormField(
-                //     items: [
-                //       for (final checkList in categories.entries)
-                //         DropdownMenuItem(
-                //             value: checkList.value,
-                //             child: Text(checkList.value.categoryTitle))
-                //     ],
-                //     onChanged: (v) {
-                //       print(v);
-                //     })
               ],
             ),
           ),
@@ -148,6 +173,15 @@ class _NewScreenState extends State<NewScreen> {
   }
 }
 
+
+    //  print(
+    //                       'DropdownButton - New Value: ${(v as ).categoryTitle}');
+    //                   print(
+    //                       'DropdownButton - Updated Value: ${_selectCategory2}');
+    //                   // });
+
+    //                   print(' DropdownButtonFormField 2nd0 $_selectCategory2');
+ 
 
            // CupertinoPicker(
                     //   itemExtent: 32,
@@ -169,3 +203,16 @@ class _NewScreenState extends State<NewScreen> {
                     //       ),
                     //   ],
                     // )
+
+
+// DropdownButton(
+//                     value: _selectCategory2,
+//                     items: [
+//                       for (final checkList in groceryItems)
+//                         DropdownMenuItem(
+//                             value: checkList, child: Text(checkList.name))
+//                     ],
+//                     onChanged: (v) {
+//                       _selectCategory2 = v; // Update variable and rebuild UI
+//                       // setState(() {});
+//                     })
