@@ -5,6 +5,7 @@ import 'package:form/data/dummy.dart';
 import 'package:form/models/category_model.dart';
 import 'package:form/screens/new_item_screen.dart';
 import 'package:form/models/grocery_item.dart';
+import 'package:http/http.dart' as http;
 
 class GroceryScreen extends StatefulWidget {
   static final id = "GroceryScreen";
@@ -17,6 +18,16 @@ class GroceryScreen extends StatefulWidget {
 class _GroceryScreenState extends State<GroceryScreen> {
   List<GroceryItem> groceryItems2 = [];
 
+  Future dbList() async {
+    try {
+      var response =
+          await http.get(Uri.https('forms-267dd-default-rtdb.firebaseio.com'));
+      print('data $response');
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,15 +37,14 @@ class _GroceryScreenState extends State<GroceryScreen> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () async {
-              var data = await Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => NewScreen()));
-
-              if (data == null) {
-                return;
+              try {
+                await Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => NewScreen()))
+                    .then((value) => {dbList()});
+                print(' checkkkkkkk');
+              } catch (e) {
+                print('Failed to load data: $e');
               }
-              groceryItems2.add(data);
-              setState(() {});
-              print('data $data');
             },
           )
         ],
@@ -68,6 +78,10 @@ class _GroceryScreenState extends State<GroceryScreen> {
     );
   }
 }
+
+
+
+
 
 // ?var iterateMap = categories.entries.elementAt(index).value;
 // itemCount: categories.entries.length,

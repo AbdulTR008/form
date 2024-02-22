@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:form/data/categories.dart';
 import 'package:form/data/dummy.dart';
@@ -100,38 +103,7 @@ class _NewScreenState extends State<NewScreen> {
                             ),
                         ],
                       ),
-                    )
-
-                        //  DropdownButtonFormField(
-                        //   value: selectCategory,
-                        //   onChanged: (value) {
-                        //     selectCategory = value;
-                        //     setState(() {});
-                        //   },
-                        //   items: [
-                        //     for (final list in categories.entries)
-                        //       DropdownMenuItem(
-                        //         value: list.value,
-                        //         child: Row(
-                        //           children: [
-                        //             Container(
-                        //               height: 16,
-                        //               width: 16,
-                        //               color: list.value.categoryColor,
-                        //             ),
-                        //             const SizedBox(
-                        //               width: 7,
-                        //             ),
-                        //             Text(
-                        //               list.value.categoryTitle,
-                        //               style: const TextStyle(color: Colors.red),
-                        //             ),
-                        //           ],
-                        //         ),
-                        //       ),
-                        //   ],
-                        // ),
-                        ),
+                    )),
                   ],
                 ),
                 const SizedBox(
@@ -149,18 +121,47 @@ class _NewScreenState extends State<NewScreen> {
                         child: const Text('Reset'),
                       ),
                       ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formState.currentState!.validate()) {
                               _formState.currentState!.save();
                             }
 
-                            Navigator.pop(
-                                context,
-                                GroceryItem(
-                                    category: selectCategory!,
-                                    id: DateTime.now().toString(),
-                                    name: _enterTitle,
-                                    quantity: _enterQuantity));
+                            var url = Uri.https(
+                                'forms-267dd-default-rtdb.firebaseio.com',
+                                // 'forms-58623-default-rtdb.firebaseio.com',
+                                'list.json');
+                            var response = await http.post(
+                              url,
+                              headers: {'content-type': 'application/json'},
+                              body: json.encode({
+                                'title': _enterTitle,
+                                'quantity': _enterQuantity,
+                                'type': selectCategory!.categoryTitle
+                              }),
+                            );
+
+                            print(
+                                'response.statusCode  ${response.statusCode}');
+
+                            if (response.statusCode == 200) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                content: Text('Data Saved'),
+                                backgroundColor: Colors.green,
+                              ));
+                            }
+                            if (!context.mounted) {
+                              return;
+                            }
+                            Navigator.pop(context);
+
+                            // Navigator.pop(
+                            //     context,
+                            //     GroceryItem(
+                            //         category: selectCategory!,
+                            //         id: DateTime.now().toString(),
+                            //         name: _enterTitle,
+                            //         quantity: _enterQuantity));
                           },
                           child: const Text('Save'))
                     ],
@@ -172,47 +173,3 @@ class _NewScreenState extends State<NewScreen> {
         ));
   }
 }
-
-
-    //  print(
-    //                       'DropdownButton - New Value: ${(v as ).categoryTitle}');
-    //                   print(
-    //                       'DropdownButton - Updated Value: ${_selectCategory2}');
-    //                   // });
-
-    //                   print(' DropdownButtonFormField 2nd0 $_selectCategory2');
- 
-
-           // CupertinoPicker(
-                    //   itemExtent: 32,
-                    //   onSelectedItemChanged: (picked) {},
-                    //   children: [
-                    //     for (final list in categories.entries)
-                    //       Row(
-                    //         children: [
-                    //           Container(
-                    //             height: 16,
-                    //             width: 16,
-                    //             color: list.value.categoryColor,
-                    //           ),
-                    //           const SizedBox(
-                    //             width: 7,
-                    //           ),
-                    //           Text(list.value.categoryTitle),
-                    //         ],
-                    //       ),
-                    //   ],
-                    // )
-
-
-// DropdownButton(
-//                     value: _selectCategory2,
-//                     items: [
-//                       for (final checkList in groceryItems)
-//                         DropdownMenuItem(
-//                             value: checkList, child: Text(checkList.name))
-//                     ],
-//                     onChanged: (v) {
-//                       _selectCategory2 = v; // Update variable and rebuild UI
-//                       // setState(() {});
-//                     })
