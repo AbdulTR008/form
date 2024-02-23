@@ -28,6 +28,44 @@ class _NewScreenState extends State<NewScreen> {
   Widget build(BuildContext context) {
     GlobalKey<FormState> _formState = GlobalKey<FormState>();
 
+    onPressed() async {
+      if (_formState.currentState!.validate()) {
+        _formState.currentState!.save();
+      }
+
+      var url =
+          Uri.https('forms-267dd-default-rtdb.firebaseio.com', 'list.json');
+      var response = await http.post(
+        url,
+        headers: {'content-type': 'application/json'},
+        body: json.encode({
+          'title': _enterTitle,
+          'quantity': _enterQuantity,
+          'type': selectCategory!.categoryTitle
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        if (!context.mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Data Saved'),
+          backgroundColor: Colors.green,
+        ));
+      }
+      if (!context.mounted) {
+        return;
+      }
+      final localKey = json.decode(response.body);
+
+      Navigator.of(context).pop(GroceryItem(
+          category: selectCategory!,
+          id: localKey['name'],
+          name: _enterTitle,
+          quantity: _enterQuantity));
+    }
+
     return Scaffold(
         appBar: AppBar(title: Text('Add New_Item')),
         backgroundColor: Theme.of(context).colorScheme.background,
@@ -121,49 +159,7 @@ class _NewScreenState extends State<NewScreen> {
                         child: const Text('Reset'),
                       ),
                       ElevatedButton(
-                          onPressed: () async {
-                            if (_formState.currentState!.validate()) {
-                              _formState.currentState!.save();
-                            }
-
-                            var url = Uri.https(
-                                'forms-267dd-default-rtdb.firebaseio.com',
-                                // 'forms-58623-default-rtdb.firebaseio.com',
-                                'list.json');
-                            var response = await http.post(
-                              url,
-                              headers: {'content-type': 'application/json'},
-                              body: json.encode({
-                                'title': _enterTitle,
-                                'quantity': _enterQuantity,
-                                'type': selectCategory!.categoryTitle
-                              }),
-                            );
-
-                            print(
-                                'response.statusCode  ${response.statusCode}');
-
-                            if (response.statusCode == 200) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content: Text('Data Saved'),
-                                backgroundColor: Colors.green,
-                              ));
-                            }
-                            if (!context.mounted) {
-                              return;
-                            }
-                            Navigator.pop(context);
-
-                            // Navigator.pop(
-                            //     context,
-                            //     GroceryItem(
-                            //         category: selectCategory!,
-                            //         id: DateTime.now().toString(),
-                            //         name: _enterTitle,
-                            //         quantity: _enterQuantity));
-                          },
-                          child: const Text('Save'))
+                          onPressed: onPressed, child: const Text('Save'))
                     ],
                   ),
                 ),
@@ -173,3 +169,4 @@ class _NewScreenState extends State<NewScreen> {
         ));
   }
 }
+   // 'forms-58623-default-rtdb.firebaseio.com',
